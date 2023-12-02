@@ -3,6 +3,6 @@
 To run a file use:
 
 ```bash
-cabal run Day01
+cabal run Day01 -- input/Day01/sample.txt
 ```
 
