@@ -55,8 +55,8 @@ day05parse :: Input -> Situation
 day05parse inp = sit
   where (Success sit) = parse @String parseDay05 inp
 
-day05a :: Situation -> String
-day05a (Situation seeds maps) = show (minimum [foldl applyMap s maps | s <- seeds])
+day05a :: Situation -> Int
+day05a (Situation seeds maps) = minimum [foldl applyMap s maps | s <- seeds]
 
 -- Part B
 seedRangeWithLength :: Int -> Int -> SeedRange
@@ -82,8 +82,8 @@ applyMapToRange (Map _ _ ras) r = applyRanges r ras
                                    ++ applyRanges (SeedRange (ss + rl) (s + l - 1)) rs
       where l = e - s + 1
 
-day05b :: Situation -> String
-day05b (Situation seeds maps) = show . minimum . map start $ srangesN
+day05b :: Situation -> Int
+day05b (Situation seeds maps) = minimum . map start $ srangesN
   where sranges0 = map (uncurry seedRangeWithLength) (pairify seeds)
         srangesN = foldl (\ra m -> concatMap (applyMapToRange m) ra) sranges0 maps
 

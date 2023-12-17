@@ -71,11 +71,11 @@ getWellFormedGame line = game
 day02Parse :: Input -> [Game]
 day02Parse input = map getWellFormedGame (lines input)
 
-day02a :: [Game] -> String
-day02a games = show . sum $ [gameId | Game gameId bags <- games, all (<= target) bags]
+day02a :: [Game] -> Int
+day02a games = sum [gameId | Game gameId bags <- games, all (<= target) bags]
 
-day02b :: [Game] -> String
-day02b games = show . sum $ [power (foldl maxBag empty bags) | (Game _ bags) <- games]
+day02b :: [Game] -> Int
+day02b games = sum [power (foldl maxBag empty bags) | (Game _ bags) <- games]
 
 main :: IO ()
 main = adventOfCode 2 (day02a . day02Parse) (day02b . day02Parse)

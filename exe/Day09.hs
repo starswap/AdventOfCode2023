@@ -6,8 +6,8 @@ import Data.List (zipWith)
 -- Mine
 import Common (adventOfCode, Input)
 
-day09 :: ([Int] -> Int) -> Input -> String
-day09 extrapolate = show . sum . map (extrapolate . map read . words) . lines
+day09 :: ([Int] -> Int) -> Input -> Int
+day09 extrapolate = sum . map (extrapolate . map read . words) . lines
 
 differences :: [Int] -> [Int]
 differences []       = error "Differences of Empty List"

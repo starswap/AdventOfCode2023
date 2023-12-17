@@ -1,4 +1,4 @@
-module Day03 where
+module Main where
 
 -- Base
 import Control.Applicative ((<|>))
@@ -21,8 +21,8 @@ inBoundsAndDigit :: (Int, Int) -> Map -> Bool
 inBoundsAndDigit (r, c) m = inBounds (h, w) (r, c) && isDigit (m ! (r, c))
   where (_, (h, w)) = bounds m
 
-day03a :: Map -> String
-day03a = show . sum . findNumbers (1, 1) "" False
+day03a :: Map -> Int
+day03a = sum . findNumbers (1, 1) "" False
 
 findNumbers :: (Int, Int) -> String -> Bool -> Map -> [Int]
 findNumbers (r, c) digString doesCount m
@@ -51,8 +51,8 @@ check (r, c) m = any checkOne [(r + dr, c + dc)| (dr, dc) <- ds]
 
     (_, (h, w)) = bounds m
 
-day03b :: Map -> String
-day03b = show . sum . findGears (1, 1)
+day03b :: Map -> Int
+day03b = sum . findGears (1, 1)
 
 findGears :: (Int, Int) -> Map -> [Int]
 findGears (r, c) m

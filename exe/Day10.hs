@@ -66,8 +66,8 @@ pathLength m prev now
   | m ! now == 'S' = 1
   | otherwise      = 1 + pathLength m now (next m prev now)
 
-day10a :: Map -> String
-day10a m = show (div (pathLength m start second) 2)
+day10a :: Map -> Int
+day10a m = div (pathLength m start second) 2
   where (start, second) = findFirstTwo m
 
 augNode :: Coords -> Coords
@@ -92,8 +92,8 @@ floodFill pipes visited w h n
   where
     recursive = foldr (\c vis -> floodFill pipes vis w h c) (S.insert n visited) (adj w h n)
 
-day10b :: Map -> String
-day10b m = show answer
+day10b :: Map -> Int
+day10b m = answer
   where
     (_, (h, w))     = bounds m
     augW            = 2 * w + 1

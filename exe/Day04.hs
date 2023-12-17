@@ -39,8 +39,8 @@ getWellFormedCard s = card
 day04parse :: Input -> [Card]
 day04parse = map getWellFormedCard . lines
 
-day04a :: [Card] -> String
-day04a = show . sum . map score
+day04a :: [Card] -> Int
+day04a = sum . map score
 
 match :: Card -> Int
 match (Card _ winners haves) = length (S.intersection winners haves)
@@ -51,8 +51,8 @@ score c
   | otherwise    = 2 ^ (matches - 1)
   where matches = match c
 
-day04b :: [Card] -> String
-day04b cs = show . sum  . map (M.foldr (+) 0) $ cardsNs
+day04b :: [Card] -> Int
+day04b cs = sum . map (M.foldr (+) 0) $ cardsNs
   where
     cardsNs :: [Map CardId Int]
     cardsNs = takeWhile (not . M.null) (iterate newCardsOneStep cards0)
