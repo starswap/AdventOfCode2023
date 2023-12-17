@@ -34,4 +34,4 @@ extractNumberB line = firstDigit * 10 + lastDigit
     lastDigit = snd . maximumBy (comparing fst) $ digitOccurs
 
 main :: IO ()
-main = adventOfCode 1 (day01 extractNumberA) (day01 extractNumberB)
+main = adventOfCode 1 id (day01 extractNumberA) (day01 extractNumberB)

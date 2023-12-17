@@ -6,16 +6,16 @@ import Data.Array (Array, listArray)
 type Line = String
 type Input = String
 
-adventOfCode :: (Show a, Show b) => Int -> (String -> a) -> (String -> b) -> IO ()
-adventOfCode dayNo partA partB = do
+adventOfCode :: (Show a, Show b) => Int -> (Input -> c) -> (c -> a) -> (c -> b) -> IO ()
+adventOfCode dayNo parse partA partB = do
     args <- getArgs
     handle <- openFile (head args) ReadMode
     contents <- hGetContents handle
     putStrLn ("--- Day " <> show dayNo <> " Results ---")
     putStr "Part A Answer: " 
-    print (partA contents)
+    print (partA . parse $ contents)
     putStr "Part B Answer: " 
-    print (partB contents)
+    print (partB . parse $ contents)
 
 arrayParse :: Input -> Array (Int, Int) Char
 arrayParse input = listArray ((1, 1), (h, w)) (concat ls)

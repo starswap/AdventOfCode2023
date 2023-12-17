@@ -74,4 +74,4 @@ day04b cs = sum . map (M.foldr (+) 0) $ cardsNs
         incr Nothing  = Just a
     
 main :: IO ()
-main = adventOfCode 4 (day04a . day04parse) (day04b . day04parse)
+main = adventOfCode 4 day04parse day04a day04b

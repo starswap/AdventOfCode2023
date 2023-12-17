@@ -88,4 +88,4 @@ day05b (Situation seeds maps) = minimum . map start $ srangesN
         srangesN = foldl (\ra m -> concatMap (applyMapToRange m) ra) sranges0 maps
 
 main :: IO ()
-main = adventOfCode 5 (day05a . day05parse) (day05b . day05parse)
+main = adventOfCode 5 day05parse day05a day05b

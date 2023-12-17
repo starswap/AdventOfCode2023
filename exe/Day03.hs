@@ -99,4 +99,4 @@ extractNumber (r, c) (dr, dc) m
   where d = m ! (r, c)
 
 main :: IO ()
-main = adventOfCode 3 (day03a . arrayParse) (day03b . arrayParse)
+main = adventOfCode 3 arrayParse day03a day03b

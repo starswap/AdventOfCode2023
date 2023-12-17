@@ -78,5 +78,5 @@ day02b :: [Game] -> Int
 day02b games = sum [power (foldl maxBag empty bags) | (Game _ bags) <- games]
 
 main :: IO ()
-main = adventOfCode 2 (day02a . day02Parse) (day02b . day02Parse)
+main = adventOfCode 2 day02Parse day02a day02b
 

@@ -106,4 +106,4 @@ day10b m = answer
     answer          = length (S.filter inOriginalGrid inside)
 
 main :: IO ()
-main = adventOfCode 10 (day10a . arrayParse) (day10b . arrayParse)
+main = adventOfCode 10 arrayParse day10a day10b

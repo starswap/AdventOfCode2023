@@ -24,4 +24,4 @@ extrapolateBackwards l
   | otherwise    = head l - extrapolateBackwards (differences l)
 
 main :: IO ()
-main = adventOfCode 9 (day09 extrapolateForwards) (day09 extrapolateBackwards)
+main = adventOfCode 9 id (day09 extrapolateForwards) (day09 extrapolateBackwards)
