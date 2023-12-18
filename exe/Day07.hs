@@ -6,7 +6,7 @@ import Text.Gigaparsec (Parsec, some)
 import Text.Gigaparsec.Char (letterOrDigit, space)
 import Data.List (sortOn, sort)
 import Data.Ord (comparing)
-import qualified Data.Set as S 
+import qualified Data.Set as S
 
 -- Mine
 import Common (adventOfCode, Input)
@@ -58,7 +58,7 @@ instance Show Card where
   show Ace   = "A"
 
 instance Ord Hand where
-  compare ha@(Hand h) hb@(Hand i) = (comparing classifyHand ha hb) <> (compare h i)
+  compare ha@(Hand h) hb@(Hand i) = comparing classifyHand ha hb <> compare h i
 
 classifyHand :: Hand -> HandType
 classifyHand (Hand [])                                          = error "Empty hand!"
@@ -71,24 +71,24 @@ classifyHand (Hand h@(c:cs))
   | unique == 3                                                 = TwoPair
   | unique == 4                                                 = OnePair
   | otherwise                                                   = HighCard
-  where sorted@(s:t:u:v:w:[]) = sort h
+  where sorted@[s, t, u, v, w] = sort h
         unique                = length (S.fromList h)
         mostCommonCard        = mostCommon (filter (/= Joker) sorted)
 
 parseCard :: (Char -> Card) -> Parsec Card
 parseCard readCard = readCard <$> letterOrDigit
 
-parseGame :: (Char -> Card) -> Parsec Game 
-parseGame readCard = Game <$> ((Hand <$> some (parseCard readCard)) <* (space)) <*> (parsePositiveInteger)
+parseGame :: (Char -> Card) -> Parsec Game
+parseGame readCard = Game <$> ((Hand <$> some (parseCard readCard)) <* space) <*> parsePositiveInteger
 
-parseDay07 :: (Char -> Card) -> Input -> [Game] 
-parseDay07 readCard = map (parseWellFormed (parseGame readCard)) . lines 
+parseDay07 :: (Char -> Card) -> Input -> [Game]
+parseDay07 readCard = map (parseWellFormed (parseGame readCard)) . lines
 
 getWinning :: (Rank, Game) -> Int
-getWinning (rank, Game hand bid) = bid * rank
+getWinning (rank, Game _ bid) = bid * rank
 
 day07 :: [Game] -> Int
-day07 games = sum . map getWinning . zip [1..] . sortOn hand $ games
+day07 = sum . map getWinning . zip [1..] . sortOn hand
 
 main :: IO ()
 main = adventOfCode 7 id (day07 . parseDay07 readCardA) (day07 . parseDay07 readCardB)
