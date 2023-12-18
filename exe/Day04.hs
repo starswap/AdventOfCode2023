@@ -1,18 +1,16 @@
-{-# LANGUAGE TypeApplications #-}
-
 module Main where
 
 --Base
 import qualified Data.Set as S
 import qualified Data.Map as M
 import Data.Map (Map)
-import Text.Gigaparsec (Parsec, Result(Success), parse,  many, some)
+import Text.Gigaparsec (Parsec, many, some)
 import Text.Gigaparsec.Char (char, space, string)
 import Text.Gigaparsec.Combinator (sepBy, sepEndBy)
 
 -- Mine
 import Common (adventOfCode, Input)
-import Parsers (parsePositiveInteger)
+import Parsers (parsePositiveInteger, parseWellFormed)
 
 type CardId = Int
 type Score = Int
@@ -32,12 +30,8 @@ parseCard = do
     haveNumbers <- sepBy parsePositiveInteger (some space)
     return (Card cardId (S.fromList winningNumbers) (S.fromList haveNumbers))
 
-getWellFormedCard :: String -> Card
-getWellFormedCard s = card
-    where (Success card) = parse @String parseCard s
-
 day04parse :: Input -> [Card]
-day04parse = map getWellFormedCard . lines
+day04parse = map (parseWellFormed parseCard) . lines
 
 day04a :: [Card] -> Int
 day04a = sum . map score

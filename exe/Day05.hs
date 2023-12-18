@@ -1,16 +1,14 @@
-{-# LANGUAGE TypeApplications #-}
-
 module Main where
 
 --Base
-import Text.Gigaparsec (Parsec, Result(Success), parse,  many)
+import Text.Gigaparsec (Parsec,  many)
 import Text.Gigaparsec.Char (space, string, letter, endOfLine)
 import Text.Gigaparsec.Combinator (sepBy)
 import Data.List (sortOn)
 
 -- Mine
 import Common (adventOfCode, Input)
-import Parsers (parsePositiveInteger, sepStartBy, sepStartEndBy)
+import Parsers (parsePositiveInteger, sepStartBy, sepStartEndBy, parseWellFormed)
 
 type Seed = Int
 type Location = Int
@@ -52,8 +50,7 @@ applyMap s (Map _ _ ras) = applyRanges s ras
       | otherwise              = applyRanges x rs
 
 day05parse :: Input -> Situation
-day05parse inp = sit
-  where (Success sit) = parse @String parseDay05 inp
+day05parse = parseWellFormed parseDay05
 
 day05a :: Situation -> Int
 day05a (Situation seeds maps) = minimum [foldl applyMap s maps | s <- seeds]
