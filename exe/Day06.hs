@@ -38,4 +38,4 @@ numberBeatRecord :: Race -> Int
 numberBeatRecord (Race t d) = length [v * (t - v) | v <- [0..t],  v * (t - v) > d]
 
 main :: IO ()
-main = adventOfCode 5 id (day06 . parseWellFormed parseDay06a) (day06 . parseWellFormed parseDay06b)
+main = adventOfCode 6 id (day06 . parseWellFormed parseDay06a) (day06 . parseWellFormed parseDay06b)
