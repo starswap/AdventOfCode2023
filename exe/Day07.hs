@@ -4,13 +4,14 @@ module Main where
 --Base
 import Text.Gigaparsec (Parsec, some)
 import Text.Gigaparsec.Char (letterOrDigit, space)
-import Data.List (sortOn, sort, maximumBy, group)
+import Data.List (sortOn, sort)
 import Data.Ord (comparing)
 import qualified Data.Set as S 
 
 -- Mine
 import Common (adventOfCode, Input)
 import Parsers (parsePositiveInteger, parseWellFormed)
+import List (replace, mostCommon)
 
 type Bid = Int
 type Rank = Int
@@ -59,17 +60,11 @@ instance Show Card where
 instance Ord Hand where
   compare ha@(Hand h) hb@(Hand i) = (comparing classifyHand ha hb) <> (compare h i)
 
-listReplace :: (Eq a) => a -> a -> [a] -> [a]
-listReplace _ _ [] = []
-listReplace s t (x:xs)
-  | s == x    = t:listReplace s t xs
-  | otherwise = x:listReplace s t xs  
-
 classifyHand :: Hand -> HandType
 classifyHand (Hand [])                                          = error "Empty hand!"
 classifyHand (Hand h@(c:cs))
   | all (== c) cs                                               = FiveOfAKind
-  | S.member Joker (S.fromList h)                               = classifyHand (Hand (listReplace Joker mostCommonCard h))
+  | S.member Joker (S.fromList h)                               = classifyHand (Hand (replace Joker mostCommonCard h))
   | all (== s) [t, u, v] || all (== t) [u, v, w]                = FourOfAKind
   | unique == 2                                                 = FullHouse
   | all (== s) [t, u] || all (== t) [u, v] || all (== u) [v, w] = ThreeOfAKind
@@ -77,11 +72,11 @@ classifyHand (Hand h@(c:cs))
   | unique == 4                                                 = OnePair
   | otherwise                                                   = HighCard
   where sorted@(s:t:u:v:w:[]) = sort h
-        unique         = length (S.fromList h)
-        mostCommonCard = fst . maximumBy (comparing snd) $ [(c, length group) | group@(c:cs) <- group (filter (/= Joker) sorted)]
+        unique                = length (S.fromList h)
+        mostCommonCard        = mostCommon (filter (/= Joker) sorted)
 
 parseCard :: (Char -> Card) -> Parsec Card
-parseCard readCard = readCard <$> (letterOrDigit)
+parseCard readCard = readCard <$> letterOrDigit
 
 parseGame :: (Char -> Card) -> Parsec Game 
 parseGame readCard = Game <$> ((Hand <$> some (parseCard readCard)) <* (space)) <*> (parsePositiveInteger)
@@ -94,8 +89,6 @@ getWinning (rank, Game hand bid) = bid * rank
 
 day07 :: [Game] -> Int
 day07 games = sum . map getWinning . zip [1..] . sortOn hand $ games
-
-inp = "32T3K 765\nT55J5 684\nKK677 28\nKTJJT 220\nQQQJA 483"
 
 main :: IO ()
 main = adventOfCode 7 id (day07 . parseDay07 readCardA) (day07 . parseDay07 readCardB)

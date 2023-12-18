@@ -17,7 +17,7 @@ author:             Hamish Starling
 maintainer:         hamishstarling@hotmail.co.uk
 
 library
-    exposed-modules: Common, Trie, String, DList, Parsers
+    exposed-modules: Common, Trie, String, DList, Parsers, List
     build-depends:    base ^>=4.14.3.0, containers, array ^>= 0.5.4.0, gigaparsec == 0.2.1.0
     hs-source-dirs:   lib
     ghc-options:      -Wall
