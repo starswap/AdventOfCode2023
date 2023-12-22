@@ -2,7 +2,6 @@ module Main where
 
 --Base
 import qualified Data.Map as M
-import qualified Data.Set as S
 import Text.Gigaparsec (Parsec, some, many, (<|>))
 import Text.Gigaparsec.Char ( char, endOfLine, string, upper )
 import Text.Gigaparsec.Combinator (sepBy)
