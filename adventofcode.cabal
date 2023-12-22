@@ -17,7 +17,7 @@ author:             Hamish Starling
 maintainer:         hamishstarling@hotmail.co.uk
 
 library
-    exposed-modules: Common, Trie, String, DList, Parsers, List
+    exposed-modules: Common, Trie, String, DList, Parsers, List, Array
     build-depends:    base ^>=4.14.3.0, containers, array ^>= 0.5.4.0, gigaparsec == 0.2.1.0
     hs-source-dirs:   lib
     ghc-options:      -Wall
@@ -120,6 +120,17 @@ executable Day11
     build-depends:    base ^>= 4.14.3.0,
                       adventofcode,
                       array ^>= 0.5.4.0,
+    hs-source-dirs:   exe
+    ghc-options:      -Wall
+    default-language: Haskell2010
+
+executable Day12
+    main-is:          Day12.hs
+    build-depends:    base ^>= 4.14.3.0,
+                      adventofcode,
+                      gigaparsec == 0.2.1.0,
+                      array ^>= 0.5.4.0,
+                      containers
     hs-source-dirs:   exe
     ghc-options:      -Wall
     default-language: Haskell2010
