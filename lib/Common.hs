@@ -1,3 +1,5 @@
+{-# LANGUAGE ScopedTypeVariables #-}
+
 module Common where
 import System.Environment (getArgs)
 import System.IO
@@ -23,3 +25,14 @@ arrayParse input = listArray ((1, 1), (h, w)) (concat ls)
     ls@(l:_) = lines input
     w = length l
     h = length ls
+  
+iterateWhile :: (a -> Bool) -> (a -> a) -> a -> [a]
+iterateWhile p f i = takeWhile p (iterate f i)
+
+countUntil :: forall a. (a -> Bool) -> (a -> a) -> a -> Int
+countUntil p f ini = aux ini 0 
+  where
+    aux :: a -> Int -> Int
+    aux x i
+      | p x       = i
+      | otherwise = aux (f x) (i + 1) 
