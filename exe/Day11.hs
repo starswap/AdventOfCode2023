@@ -1,10 +1,11 @@
 module Main where
 
 -- Base
-import Data.Array (Array, (!), bounds, ixmap)
+import Data.Array (Array, (!), bounds)
 
 -- Mine
 import Common (adventOfCode, arrayParse)
+import Array (transpose)
 
 type Coords = (Int, Int)
 type Map = Array Coords Char
@@ -44,7 +45,7 @@ day11 d m = sum [dist d g g' emR emC | g <- gals, g' <- gals, g < g']
   where
     gals = findGalaxies m (1, 1)
     emR = emptyRows m (1, 1) True
-    emC = emptyRows (ixmap (bounds m) (\(r, c) -> (c, r)) m) (1, 1) True
+    emC = emptyRows (transpose m) (1, 1) True
 
 main :: IO ()
 main = adventOfCode 11 arrayParse (day11 1) (day11 999999)

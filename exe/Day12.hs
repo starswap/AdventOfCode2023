@@ -15,7 +15,7 @@ import Data.List (intercalate)
 
 data SpringConfig = SpringConfig [Char] [Int]
 
-day12parse :: Parsec SpringConfig 
+day12parse :: Parsec SpringConfig
 day12parse = do
   letters <- many (oneOf (S.fromList "?.#"))
   space
@@ -24,12 +24,12 @@ day12parse = do
 
 doDP :: SpringConfig -> Int
 doDP (SpringConfig lettersList numbersList) = table ! (0, 0)
-  where 
+  where
     m = length lettersList
     n = length numbersList
-    
-    letters = (listArray (0, m - 1) lettersList)
-    numbers = (listArray (0, n - 1) numbersList)
+
+    letters = listArray (0, m - 1) lettersList
+    numbers = listArray (0, n - 1) numbersList
 
     table = tabulate ((0, 0), (m + 1, n)) (uncurry memo)
 
@@ -37,7 +37,7 @@ doDP (SpringConfig lettersList numbersList) = table ! (0, 0)
     memo letIdx numIdx
       | letIdx >= m              = if numIdx < n then 0 else 1
       | numIdx >= n && ch == '#' = 0
-      | numIdx >= n && ch == '?' = dotResult 
+      | numIdx >= n && ch == '?' = dotResult
       | ch == '.'                = dotResult
       | ch == '#'                = hashResult
       | ch == '?'                = dotResult + hashResult
@@ -53,9 +53,9 @@ doDP (SpringConfig lettersList numbersList) = table ! (0, 0)
 
 unfoldSprings :: SpringConfig -> SpringConfig
 unfoldSprings (SpringConfig letters numbers) = SpringConfig newLetters newNumbers
-  where 
+  where
     newNumbers = concat (replicate 5 numbers)
-    newLetters = intercalate "?" (replicate 5 (letters)) 
+    newLetters = intercalate "?" (replicate 5 letters)
 
 day12a :: [SpringConfig] -> Int
 day12a = sum . map doDP

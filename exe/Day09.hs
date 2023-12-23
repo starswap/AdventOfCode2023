@@ -1,8 +1,5 @@
 module Main where
 
---Base
-import Data.List (zipWith)
-
 -- Mine
 import Common (adventOfCode, Input)
 
