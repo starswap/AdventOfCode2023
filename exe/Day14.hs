@@ -11,7 +11,7 @@ import Common (adventOfCode, arrayParse)
 type Grid = Array (Int, Int) Char
 data Rock = Cube {loc :: (Int, Int)} | Round {loc :: (Int, Int)} deriving (Show, Eq)
 
--- Just compare based on position
+-- Just compare based on position, ignoring rock type
 instance Ord Rock where
   r <= r' = loc r <= loc r'
 
@@ -56,6 +56,11 @@ tipRocksOneCol f [r] = [r]
 tipRocksOneCol f (x : (Round _) : ys) = x : tipRocksOneCol f (Round (f (loc x)):ys) 
 tipRocksOneCol f (x : (Cube r) : ys)  = x : tipRocksOneCol f ((Cube r):ys)
 
+tipNorth = tipRocks (\(r, c) -> (r + 1, c))
+tipWest = tipRocks (\(r, c) -> (r, c + 1))
+tipSouth = tipRocks (\(r, c) -> (r - 1, c))
+tipEast = tipRocks (\(r, c) -> (r, c - 1))
+
 scoreRocks ::  ((Int, Int) -> Int) -> Int -> [[Rock]] -> Int
 scoreRocks f h = sum . map (scoreRocksOneCol f h) 
 
@@ -63,11 +68,6 @@ scoreRocksOneCol :: ((Int, Int) -> Int) -> Int -> [Rock] -> Int
 scoreRocksOneCol f _ []             = 0
 scoreRocksOneCol f h (Cube _ : rs)  = scoreRocksOneCol f h rs
 scoreRocksOneCol f h (Round r : rs) = scoreRocksOneCol f h rs + (h - (f r) + 1)
-
-tipNorth = tipRocks (\(r, c) -> (r + 1, c))
-tipWest = tipRocks (\(r, c) -> (r, c + 1))
-tipSouth = tipRocks (\(r, c) -> (r - 1, c))
-tipEast = tipRocks (\(r, c) -> (r, c - 1))
 
 day14a :: Grid -> Int
 day14a arr = (scoreRocks fst h) . tipNorth . getRocks $ arr
@@ -93,8 +93,6 @@ day14b arr = scoreRocks fst h (rss !! index)
     (cycleEnd, cycleStart, rss) = cacheSpins (h, w) 0 (getRocks arr) (M.empty)
     cycleLen = cycleEnd - cycleStart
     index = cycleStart + (1000000000 - cycleEnd) `mod`cycleLen
-
-inp = "O....#....\nO.OO#....#\n.....##...\nOO.#O....O\n.O.....O#.\nO.#..O.#.#\n..O..#O..O\n.......O..\n#....###..\n#OO..#...."
 
 main :: IO ()
 main = adventOfCode 14 arrayParse day14a day14b
