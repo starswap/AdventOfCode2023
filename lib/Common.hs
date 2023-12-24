@@ -36,3 +36,6 @@ countUntil p f ini = aux ini 0
     aux x i
       | p x       = i
       | otherwise = aux (f x) (i + 1) 
+
+uncurry3 :: (a -> b -> c -> d) -> ((a, b, c) -> d)
+uncurry3 f (a, b, c) = f a b c

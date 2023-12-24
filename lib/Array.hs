@@ -19,3 +19,7 @@ transpose m = ixmap (swap l, swap u) swap  m
   where
     swap = \(r, c) -> (c, r)
     (l, u) = bounds m
+
+inBounds :: Array (Int, Int) a -> (Int, Int) -> Bool
+inBounds g (r, c) = (r >= 1) && (r <= h) && (c >= 1) && (c <= w)
+  where (_, (h, w)) = bounds g

@@ -6,13 +6,12 @@ import Data.Array (Array, bounds, (!))
 
 -- Mine
 import Common (adventOfCode, arrayParse)
+import Array (inBounds)
+import Tuple ((+++))
 
 type Coords = (Int, Int)
 type Grid = Array Coords Char
 type Direction = (Int, Int)
-
-(+++) :: (Int, Int) -> (Int, Int) -> (Int, Int)
-(x, y) +++ (x', y') = (x + x', y + y')
 
 left :: Direction
 left = (0, -1)
@@ -25,10 +24,6 @@ up = (-1, 0)
 
 down :: Direction
 down = (1, 0)
-
-inBounds :: Grid -> Coords -> Bool
-inBounds g (r, c) = (r >= 1) && (r <= h) && (c >= 1) && (c <= w)
-  where (_, (h, w)) = bounds g
 
 updateSeen :: Coords -> Direction -> M.Map Coords [Direction] -> M.Map Coords [Direction]
 updateSeen x dir = M.insertWith (++) x [dir] 
