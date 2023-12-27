@@ -5,6 +5,7 @@ import Common (adventOfCode, Input)
 import Array (inBounds)
 import Tuple ((+++))
 import PQ (PQ, deleteFindMin, insert, singleton)
+import Direction (Direction(L, R, U, D), delta, leftTurn, rightTurn)
 
 -- Base
 import Data.Array (Array, (!), bounds, listArray)
@@ -17,20 +18,6 @@ type StateSpaceV = (Coords, Int, Direction)
 type CostMap = M.Map StateSpaceV Int
 type DijkstraState = (PQ StateSpaceV, CostMap)
 type CrucibleRules = Int -> DijkstraState -> DijkstraState -> DijkstraState -> Coords -> (Int, Int) -> Maybe DijkstraState
-
-data Direction = R | D | L | U deriving (Eq, Ord, Enum, Show)
-
-delta :: Direction -> (Int, Int)
-delta L = (0, -1)
-delta R = (0, 1)
-delta U = (-1, 0)
-delta D = (1, 0)
-
-leftTurn :: Direction -> Direction
-leftTurn x = toEnum $ (fromEnum x - 1) `mod` 4
-
-rightTurn :: Direction -> Direction
-rightTurn x = toEnum $ (fromEnum x + 1) `mod` 4
 
 basicCrucibles :: CrucibleRules
 basicCrucibles x noStraight _ allOptions (r, c) (h, w) 
