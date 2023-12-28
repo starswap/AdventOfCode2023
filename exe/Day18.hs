@@ -12,6 +12,7 @@ import Text.Gigaparsec (Parsec, (<|>))
 import Text.Gigaparsec.Combinator (sepBy, exactly)
 import Text.Gigaparsec.Char (endOfLine, char, space, hexDigit, string)
 
+type Correction = Int
 type Coords = (Int, Int)
 data Instruction = Instruction Direction Int deriving Show
 data Edge = Edge {row :: Int, minCol :: Int, maxCol :: Int} deriving (Show, Eq, Ord)
@@ -19,15 +20,15 @@ data Edge = Edge {row :: Int, minCol :: Int, maxCol :: Int} deriving (Show, Eq, 
 infty :: Int
 infty = maxBound `div` 2
 
-parseDirection :: Parsec Direction
-parseDirection = L <$ char 'L' <|> R <$ char 'R' <|> U <$ char 'U' <|> D <$ char 'D'
-
 fromHex :: String -> Int
 fromHex = snd . foldr (\digit (pos, ans) -> (16 * pos, pos * hexDigitToInt digit + ans)) (1, 0)
   where hexDigitToInt :: Char -> Int
         hexDigitToInt x
           | isNumber x   = digitToInt x
           | otherwise    = 10 + ord (toUpper x) - ord 'A'
+
+parseDirection :: Parsec Direction
+parseDirection = L <$ char 'L' <|> R <$ char 'R' <|> U <$ char 'U' <|> D <$ char 'D'
 
 parseInstructionA :: Parsec Instruction
 parseInstructionA = do
@@ -59,30 +60,52 @@ edges = snd . foldl (uncurry processInstruction) ((0, 0), [])
 edgeLength :: Edge -> Int
 edgeLength e = maxCol e - minCol e + 1
 
--- might be able to move the edgeLength inside to the base cases
-updateActiveEdges :: [Edge] -> Edge -> ([Edge], Int)
-updateActiveEdges [] newEdge = ([newEdge], 0)
+-- Apply an edge to the active edge set, turning on or off pixels
+-- as necessary. Returns the new active edge set and a "correction factor"
+-- The correction factor deals with the issue that if an edge enlarges the
+-- active pixel set we need to include that in the current row, whereas
+-- if the edge reduces the active pixel set, we want to count the current
+-- row as if that hasn't happened yet. We do this by assuming we can
+-- count an edge with the rows that come before it. This means that any
+-- removals by this row are ignored for the purpose of calculating its
+-- score which is what we want, but any additions are not. We add those
+-- in separately via the correction factor. 
+-- Note the definition of <$> for a tuple maps the function over the snd.
+updateActiveEdges :: [Edge] -> Edge -> ([Edge], Correction)
+updateActiveEdges [] newEdge                                 = ([newEdge], edgeLength newEdge)                                                  -- Completely new edge; correction factor = the amount we added
 updateActiveEdges (e:es) newEdge
-  | maxCol newEdge + 1 == minCol e                       = (Edge (row e) (minCol newEdge) (maxCol e):es, 0)
-  | minCol newEdge == maxCol e + 1                       = (Edge (row e) (minCol e) (maxCol newEdge):es, 0)
-  | maxCol newEdge == minCol e                           = (fst (updateActiveEdges es (Edge (row e) (minCol newEdge) (maxCol e))), snd (updateActiveEdges es (Edge (row e) (minCol newEdge) (maxCol e))) -1)
-  | minCol newEdge == maxCol e                           = (fst (updateActiveEdges es (Edge (row e) (minCol e) (maxCol newEdge))), snd (updateActiveEdges es (Edge (row e) (minCol e) (maxCol newEdge))) -1)
-  | maxCol newEdge < minCol e                            = (newEdge:e:es, 0)
-  | minCol e == minCol newEdge && maxCol e == maxCol newEdge = (es, (- edgeLength newEdge))
-  | minCol e == minCol newEdge && maxCol e < maxCol newEdge  = let (f, s) = updateActiveEdges es (Edge (row e) (maxCol e + 1) (maxCol newEdge)) in (f, s - edgeLength e)
-  | minCol e == minCol newEdge && maxCol e > maxCol newEdge  = (Edge (row e) (maxCol newEdge) (maxCol e):es, (- edgeLength newEdge))
-  | maxCol e == maxCol newEdge && minCol e > minCol newEdge  = let (f, s) = updateActiveEdges es (Edge (row e) (minCol newEdge) (minCol e - 1)) in (f, s - edgeLength e)
-  | maxCol e == maxCol newEdge && minCol e < minCol newEdge  = (Edge (row e) (minCol e) (minCol newEdge):es, (- edgeLength newEdge))
-  | minCol e < minCol newEdge && maxCol e > maxCol newEdge   = (Edge (row e) (minCol e) (minCol newEdge):(Edge (row e) (maxCol newEdge) (maxCol e)):es, (- edgeLength newEdge))
-  | otherwise                                        = let (es', d) = updateActiveEdges es newEdge in (e:es', d)
+  | maxCol newEdge < minCol e                                = (newEdge:e:es, edgeLength newEdge)                                               -- Completely new edge; correction factor = the amount we added
+  | minCol e == minCol newEdge && maxCol e == maxCol newEdge = (es, 0)                                                                          -- Completely deleting an existing edge
+  | maxCol newEdge == minCol e                               = (+ (edgeLength newEdge - edgeLength newOld - 1)) <$> updateActiveEdges es newOld -- Overlaps an existing edge, try to insert the new combined edge. Reduce correction factor to just the edge we started inserting, minus 1 to account for the overlap
+  | minCol newEdge == maxCol e                               = (+ (edgeLength newEdge - edgeLength oldNew - 1)) <$> updateActiveEdges es oldNew -- Overlaps an existing edge, try to insert the new combined edge. Reduce correction factor to just the edge we started inserting, minus 1 to account for the overlap
+  | minCol e == minCol newEdge && maxCol e > maxCol newEdge  = (oldAfter:es, 0)                                                                 -- Fully enclosed by an existing edge; turn that part of it off
+  | maxCol e == maxCol newEdge && minCol e < minCol newEdge  = (oldBefore:es, 0)                                                                -- Fully enclosed by an existing edge; turn that part of it off
+  | minCol e < minCol newEdge  && maxCol e > maxCol newEdge  = (oldBefore:oldAfter:es, 0)                                                       -- Fully enclosed by an existing edge; turn that part of it off
+  | otherwise                                                = let (es', d) = updateActiveEdges es newEdge in (e:es', d)                        -- Haven't yet found the right place where this edge should go in the sorted activeEdges
+  where newOld    = Edge (row e) (minCol newEdge) (maxCol e)
+        oldNew    = Edge (row e) (minCol e) (maxCol newEdge)
+        oldBefore = Edge (row e) (minCol e) (minCol newEdge)
+        oldAfter  = Edge (row e) (maxCol newEdge) (maxCol e)
 
+-- Sweep from the top of the picture (-ve infinity)
+-- to the bottom, keeping track of which columns are currently 'on' in terms
+-- of the 'active' horizontal "edges" that caused them to be on.
+-- (process all edges at this row in one go, accumulating correction factors)
+-- ####### <- previousRows = 0 * infty  + CF of 7
+-- #.....#
+-- ###...# <- previousRows = 7 * 2 (14) + CF of 0
+-- ..#...#
+-- ..#...#
+-- ###.### <- previousRows = 5 * 3 (15) + CF of 2
+-- #...#..
+-- ##..### <- previousRows = 5 * 2 (10) + CF of 2
+-- .#....#
+-- .###### <- previousRows = 6 * 2 (12) + CF of 0
 sweepLine :: [[Edge]] -> [Edge] -> Int -> Int
-sweepLine [] [] _  = 0
-sweepLine (ees@(e:_):fs) activeEdges r
-  = theseRows + scd + sweepLine fs activeEdges' (row e + 1)
-  where activeNodes  = sum . map edgeLength $ activeEdges
-        (activeEdges', scd) = foldl (\(ae, sc) e -> let (ae', sc') = updateActiveEdges ae e in (ae', sc + sc' +  edgeLength e)) (activeEdges, 0) ees
-        theseRows    = activeNodes * (row e - r + 1)
+sweepLine [] [] _              = 0
+sweepLine (ees@(e:_):fs) aes r = previousRows + sweepLine fs aes' (row e)
+  where previousRows             = (sum . map edgeLength $ aes) * (row e - r) + correctionFactor
+        (aes', correctionFactor) = foldl (\(ae, corr) edge -> (+ corr) <$> updateActiveEdges ae edge) (aes, 0) ees 
 sweepLine _ _ _ = error "Error: The hole was not a single closed polygon"
 
 day18 :: [Instruction] -> Int
